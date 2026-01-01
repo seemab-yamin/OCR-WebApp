@@ -3,6 +3,22 @@
 ## Project Overview
 FastAPI-based web application for Optical Character Recognition (OCR) with REST API endpoints.
 
+## Features:
+- OCR: Extract Text from images
+
+- Logging: For debugging and monitoring
+
+- Health Check: An endpoint to check availability without performing full functionality
+
+- Dockerized Solution provides Easy Scaling & Deployment
+
+- FastAPI provides native Async request processing
+
+- Validation and Error Handling
+
+## Demo
+[![OCR WebApp Demo](https://img.youtube.com/vi/qkMXNliMgt4/0.jpg)](https://youtu.be/qkMXNliMgt4)
+
 ## Project Structure
 ```
 ocr-webapp/
@@ -41,4 +57,4 @@ jupyter notebook \
 
 docker start -ai 6cf5b9ef1db7bb3db59f85c5fe8da3af00883cccf30244f4c764720b947c3b6b
 
-docker cp "C:\Users\pc\Documents\SEEMAB\ocr-webapp\sample.png" "6cf5b9ef1db7bb3db59f85c5fe8da3af00883cccf30244f4c764720b947c3b6b:/app"
+docker cp "sample.png" "6cf5b9ef1db7bb3db59f85c5fe8da3af00883cccf30244f4c764720b947c3b6b:/app"
