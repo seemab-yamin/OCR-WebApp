@@ -1,0 +1,6 @@
+notebook
+pytesseract
+Pillow
+fastapi
+uvicorn
+python-multipart
