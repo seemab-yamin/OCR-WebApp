@@ -25,5 +25,11 @@ async def upload_file(file: UploadFile = File(...)):
         text = pytesseract.image_to_string(image)
         return {"filename": file.filename, "extracted_text": text}
 
+
+@app.get("/health")
+async def health():
+    return {"status": "Service alive!"}
+
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
