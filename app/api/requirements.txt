@@ -1,6 +1,5 @@
-notebook
-pytesseract
-Pillow
 fastapi
 uvicorn
 python-multipart
+boto3
+pydantic

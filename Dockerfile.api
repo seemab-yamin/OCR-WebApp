@@ -1,0 +1,20 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY app/api/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY app/api app/api
+COPY app/storage app/storage
+COPY app/queue app/queue
+
+# Non‑sensitive defaults (override at runtime as needed)
+ENV AWS_REGION=us-east-1
+ENV S3_BUCKET_NAME=ocr-webapp-mvp
+ENV OCR_QUEUE_URL=https://sqs.us-east-1.amazonaws.com/182399721343/ocr-webapp-mvp.fifo
+
+# Expose the port FastAPI will run on
+EXPOSE 8000
+
+CMD ["uvicorn", "app.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
