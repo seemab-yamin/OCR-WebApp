@@ -11,10 +11,21 @@ S3_BUCKET = os.getenv("S3_BUCKET_NAME")
 s3_client = boto3.client("s3", region_name=AWS_REGION)
 
 
-def generate_s3_presigned_url(key: str, content_type: str, expires_in=300):
+def generate_s3_presigned_put_url(key: str, content_type: str, expires_in=300):
     return s3_client.generate_presigned_url(
         ClientMethod="put_object",
         Params={"Bucket": S3_BUCKET, "Key": key, "ContentType": content_type},
+        ExpiresIn=expires_in,
+    )
+
+
+def generate_presigned_get_url(key: str, expires_in=300):
+    return s3_client.generate_presigned_url(
+        ClientMethod="get_object",
+        Params={
+            "Bucket": S3_BUCKET,
+            "Key": key,
+        },
         ExpiresIn=expires_in,
     )
 
