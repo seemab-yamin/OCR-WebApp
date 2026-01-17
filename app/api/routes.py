@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, UploadFile, File
 from fastapi.responses import JSONResponse
-from app.storage.s3 import generate_s3_presigned_url
-
+from app.storage.s3 import generate_s3_presigned_put_url, generate_presigned_get_url
+from app.db.jobs import create_job, get_job
 from app.queue.sqs import enqueue_job
 
 
@@ -43,7 +43,7 @@ async def upload_file(file: UploadFile = File(...)):
 
         try:
             # Generate presigned URL
-            upload_url = generate_s3_presigned_url(
+            upload_url = generate_s3_presigned_put_url(
                 key=s3_key,
                 content_type=file.content_type,
             )
@@ -70,12 +70,56 @@ async def upload_file(file: UploadFile = File(...)):
 @router.post("/submit")
 async def submit_file(job_id: str, s3_key: str):
     # TODO: validate if file exists in S3
-    # TODO: add in db for later tracking
+
+    # add in db for later tracking
+    create_job(job_id, s3_key)
 
     # Enqueue job immediately
     enqueue_job(job_id, s3_key)
 
     return {"job_id": job_id, "message": "Job submitted successfully"}
+
+
+@router.get("/status/{job_id}")
+async def get_job_status(job_id: str):
+    # retrieve job status from database
+    job = get_job(job_id)
+
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    return {
+        "job_id": job_id,
+        "status": job["status"],
+        "result_s3_key": job.get("output_s3_key"),
+        "error": job.get("error"),
+    }
+
+
+@router.get("/result/{job_id}")
+def get_result(job_id: str):
+    job = get_job(job_id)
+
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    if job["status"] != "DONE":
+        raise HTTPException(
+            status_code=400,
+            detail=f"Job not completed. Current status: {job['status']}",
+        )
+
+    output_key = job.get("output_s3_key")
+    if not output_key:
+        raise HTTPException(status_code=500, detail="Result missing")
+
+    download_url = generate_presigned_get_url(output_key)
+
+    return {
+        "job_id": job_id,
+        "download_url": download_url,
+        "expires_in_seconds": 300,
+    }
 
 
 @router.get("/health")
