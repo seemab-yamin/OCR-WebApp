@@ -41,11 +41,11 @@ ocr-webapp/
 - **Blueprint.md** - Project blueprint and design documentation
 
 ## Docker Commands
-docker build -t ocr-webapp .
+docker build -f Dockerfile.api -t ocr-webapp-api .
 
-docker run -p 8000:8000 ocr-webapp
+docker run --env-file .env -p 8000:8000 ocr-webapp-api
 
-docker run -it -p 8000:8000 -v "${PWD}:/app" ocr-webapp /bin/bash
+docker run -it -p 8000:8000 -v "${PWD}:/app" ocr-webapp-api /bin/bash
 
 jupyter notebook \
   --port 8000 \
@@ -58,3 +58,21 @@ jupyter notebook \
 docker start -ai 6cf5b9ef1db7bb3db59f85c5fe8da3af00883cccf30244f4c764720b947c3b6b
 
 docker cp "sample.png" "6cf5b9ef1db7bb3db59f85c5fe8da3af00883cccf30244f4c764720b947c3b6b:/app"
+
+## CURL Command To Upload Images on Presigned Url
+
+PRESIGNED_URL=''
+
+
+#### For PNG
+curl -X PUT \
+     -H "Content-Type: image/png" \
+     --upload-file /Users/levi/Downloads/ocr-test-1.png \
+     "$PRESIGNED_URL"
+
+
+#### For JPEG (works for both .jpg and .jpeg extension)
+curl -X PUT \
+     -H "Content-Type: image/jpeg" \
+     --upload-file /path/to/your/photo.jpg \
+     "$PRESIGNED_URL"
