@@ -1,6 +1,7 @@
-FROM python:3.11-slim
+FROM public.ecr.aws/lambda/python:3.11
 
-WORKDIR /app
+# Lambda runtime looks for modules in /var/task (LAMBDA_TASK_ROOT)
+WORKDIR /var/task
 
 COPY app/api/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
@@ -15,8 +16,4 @@ ENV AWS_REGION=us-east-1
 ENV OCR_JOBS_TABLE=ocr-jobs
 ENV S3_BUCKET_NAME=ocr-webapp-mvp
 ENV OCR_QUEUE_URL=https://sqs.us-east-1.amazonaws.com/182399721343/ocr-webapp-mvp.fifo
-
-# Expose the port FastAPI will run on
-EXPOSE 8000
-
-CMD ["uvicorn", "app.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["app.api.main.handler"]

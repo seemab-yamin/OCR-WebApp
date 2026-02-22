@@ -1,15 +1,27 @@
 from fastapi import FastAPI
 import uvicorn
+from mangum import Mangum
 import os
+import logging
+import sys
 
 from app.api import routes  # import your routes module
 
-# Ensure logs folder exists
-os.makedirs("logs", exist_ok=True)
+# Lambda has a read-only filesystem; use stdout (→ CloudWatch) instead of file
+if os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        handlers=[logging.StreamHandler(sys.stdout)],
+    )
+else:
+    os.makedirs("logs", exist_ok=True)
+    logging.basicConfig(
+        filename="logs/api.log",
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
 
-import logging
-
-logging.basicConfig(filename="logs/api.log", level=logging.INFO)
 logger = logging.getLogger("api")
 
 ALLOWED_EXT = {"png", "jpg", "jpeg"}
@@ -23,6 +35,9 @@ app = FastAPI(
 
 # Include routes
 app.include_router(routes.router)
+
+# Lambda handler (used when deployed to AWS)
+handler = Mangum(app, lifespan="off")
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
